@@ -161,7 +161,7 @@ export default class GroupChatting extends React.Component {
     this.get_msgs()
 
     this.props.navigation.addListener('focus',()=>{
-    this.sheetRef.current.snapTo(2)
+    
     this.check_group_mutation()
 
     this.get_msgs()
@@ -322,13 +322,20 @@ export default class GroupChatting extends React.Component {
                       
                       if(msg.muted <1 && !msg.emoji){
                           return(
-                              <View style={{flexDirection:'row'}} key={msg.message_id}>
+                              <View  key={msg.message_id} >
                                 {msg.sended_by != this.state.my_info.user_id?
-                                <TouchableOpacity onPress={()=>this.props.navigation.navigate('UserInfo',{id:msg.user_id})}>
-                                <Image source={{uri:base_url+'static/profile_pics/'+msg.profile_pic}} style={{width:25,height:25,borderRadius:30,top:5}}/>
+                                <TouchableOpacity style={{marginTop:5}} onPress={()=>this.props.navigation.navigate('UserInfo',{id:msg.user_id})}>
+                                    <View style={{flexDirection: 'row'}}>
+                                <Image source={{uri:base_url+'static/profile_pics/'+msg.profile_pic}} style={{width:25,height:25,borderRadius:30,}}/>
+                                <Text style={{color:'white',}}>{msg.user_name}</Text>
+                                
+
+                                </View>
+
                                 </TouchableOpacity>
                                 :null}
-                              <View  style={{backgroundColor:msg.sended_by == this.state.user_id?'#0DAAAA':'#323232',marginTop:10,width:'50%',borderRadius:10,padding:msg.image?8:5,left:msg.sended_by == this.state.user_id?Dimensions.get('window').width*2/4.5:0}}>
+                              <View  style={{backgroundColor:msg.sended_by == this.state.user_id?'#0DAAAA':'#323232',marginTop:msg.sended_by == this.state.my_info.user_id?20:0,width:'50%',borderRadius:10,padding:msg.image?8:5,left:msg.sended_by == this.state.user_id?Dimensions.get('window').width*2/4.5:20,}}>
+
                                 
                                 {msg.message_txt?<Text style={{color:'white'}}>{msg.message_txt}</Text>:null}
 
