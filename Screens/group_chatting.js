@@ -148,7 +148,7 @@ export default class GroupChatting extends React.Component {
         Axios.get(base_url+'get_msgs')
         .then(res=>{
             this.setState({msgs:res.data.msgs})
-            console.log(res.data.msgs)
+           
         })
         .catch(err=>{
             this.setState({msgs_error:'Something Went Wrong'})
@@ -350,9 +350,9 @@ export default class GroupChatting extends React.Component {
                                <View style={{flexDirection: 'row',flexWrap:'wrap'}}>
                                 {msg.message_txt?msg.message_txt.split(' ').map(data=>{
                                 
-                                if(data[0] == '$'){
+                                if(data[0] == '$' && data.length>1){
                                    
-                                  return <TouchableOpacity onPress={()=>Alert.alert(data)}>
+                                  return <TouchableOpacity onPress={()=>this.props.navigation.navigate('Coin',{coin_name:data})}>
                                    <Text style={{color:'blue',textDecoration:'underline'}}> {data} </Text>
                                    </TouchableOpacity>
 

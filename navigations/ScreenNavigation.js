@@ -17,6 +17,8 @@ import UserInfo from '../Screens/user_info'
 import MuteUsers from '../Screens/mute_users'
 import Settings from '../Screens/setting'
 import base_url from '../Screens/base_url'
+import ViewCoin from '../Screens/ViewCoin'
+
 const Stack = createStackNavigator();
 
 
@@ -101,6 +103,13 @@ export const ScreenNavigator = () => {
         <Stack.Screen
           name="Alerts"
           component={Alerts}
+          options={{headerTransparent:false,headerTintColor:'white',headerStyle:{backgroundColor:'#323232'}}}
+
+        />
+
+        <Stack.Screen
+          name="Coin"
+          component={ViewCoin}
           options={{headerTransparent:false,headerTintColor:'white',headerStyle:{backgroundColor:'#323232'}}}
 
         />

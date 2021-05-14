@@ -77,8 +77,10 @@ export default class HomeCoins extends React.Component {
   search_coin = (value)=>{
     Axios.get(`https://cloud.iexapis.com/stable/stock/${value}/quote?token=pk_0db8d87dbdde49c5b215cd4ec559ed13&format=json`)
     .then(res=>{
-       
-         this.setState({searched_data:res.data})
+         if(res.status != 404){
+          this.setState({searched_data:res.data})
+
+         }
          console.log(res.data)
       
     })
@@ -243,6 +245,7 @@ export default class HomeCoins extends React.Component {
               // value={email}
               onChangeText={value => {
                 this.setState({ value })
+
                 this.search_coin(value)
               
               }}
@@ -321,7 +324,9 @@ export default class HomeCoins extends React.Component {
               </Content>
             </Container>
           ) : this.state.searched_data?(
-           <TouchableOpacity style={{borderColor:'gray',width:Dimensions.get('window').width,borderWidth:.5,marginTop:20,padding:30,borderRadius:3,height:'47%'}}>
+
+
+           <TouchableOpacity onPress={()=>this.props.navigation.navigate('Coin',{coin_name:'$'+this.state.searched_data.symbol})} style={{borderColor:'gray',width:Dimensions.get('window').width,borderWidth:.5,marginTop:20,padding:30,borderRadius:3,height:'47%'}}>
              <View style={{flexDirection: 'row'}}>
              
              <View style={{borderColor:'gray',borderWidth:1,backgroundColor:'gray',borderRadius:200,justifyContent:'center',alignItems: 'center',padding:8,width:60,height:60}}>
@@ -347,6 +352,9 @@ export default class HomeCoins extends React.Component {
           ):null}
         </View>
       </Root>
+
+
+
     );
   }
 }
