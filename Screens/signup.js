@@ -4,7 +4,9 @@ import Axios from 'axios'
 import { TextInput } from 'react-native-gesture-handler'
 import * as ImagePicker from 'expo-image-picker';
 import base_url from './base_url'
-
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions'
+import Constants from 'expo-constants'
 
 export default class Signup extends React.Component {
 
@@ -14,6 +16,7 @@ export default class Signup extends React.Component {
 
         username:'',
         password:'',
+        token:'',
 
         //errors Startes
 
@@ -61,6 +64,39 @@ export default class Signup extends React.Component {
           }
     }
 
+    registerForPushNotificationsAsync = async()=>{
+        let token;
+        if (Constants.isDevice) {
+          const { status: existingStatus } = await Notifications.getPermissionsAsync();
+          let finalStatus = existingStatus;
+          if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+          }
+          if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+          }
+          token = (await Notifications.getExpoPushTokenAsync()).data;
+          console.log(token);
+        } else {
+          alert('Must use physical device for Push Notifications');
+        }
+      
+        if (Platform.OS === 'android') {
+          Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+          });
+        }
+      
+        this.setState({token:token})
+        
+      }
+
+
      pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -93,6 +129,8 @@ export default class Signup extends React.Component {
         })
         formData.append('user_name',this.state.username)
         formData.append('password',this.state.password)
+        formData.append('token',this.state.token)
+
         Axios.post(base_url+'register_user',formData)
         .then(res=>{
             if(res.data.msg == 'You are Successfully Registered'){
@@ -113,6 +151,8 @@ export default class Signup extends React.Component {
 
     componentDidMount() {
         this.Permissions()
+        this.registerForPushNotificationsAsync()
+        console.log(this.state.token)
     }
 
     render(){

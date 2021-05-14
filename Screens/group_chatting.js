@@ -105,7 +105,7 @@ const emojis = [{
 ]
 
 
-
+let coins_list = ['btc','am','hello']
 
 export default class GroupChatting extends React.Component {
    
@@ -121,7 +121,8 @@ export default class GroupChatting extends React.Component {
         emoji:'',
         msgs:[],
         msgs_error:'',
-        user_id:''
+        user_id:'',
+
         
     }
 
@@ -264,6 +265,16 @@ export default class GroupChatting extends React.Component {
       }
 
 
+      checkingForTag = (tag)=>{
+        coins_list.map(data=>{
+          
+            if(data == tag){
+                
+                return true
+            }
+            return false
+        })
+      }
 
      renderContent = () => (
         <View
@@ -311,7 +322,7 @@ export default class GroupChatting extends React.Component {
                     </TouchableOpacity>
                     
                     :null}
-                    <View style={{marginTop:50,borderWidth:1,borderColor:'gray',borderRadius:8,padding:10,width:'50%',alignSelf: 'center'}}>
+                    <View style={{marginTop:50,borderWidth:1,borderColor:'gray',borderRadius:8,padding:10,width:'45%',alignSelf: 'center'}}>
                     <Image source={require('../assets/icon.png')} style={{width:160,height:160}}/>
 
                     </View>
@@ -336,12 +347,24 @@ export default class GroupChatting extends React.Component {
                                 :null}
                               <View  style={{backgroundColor:msg.sended_by == this.state.user_id?'#0DAAAA':'#323232',marginTop:msg.sended_by == this.state.my_info.user_id?20:0,width:'50%',borderRadius:10,padding:msg.image?8:5,left:msg.sended_by == this.state.user_id?Dimensions.get('window').width*2/4.5:20,}}>
 
+                               <View style={{flexDirection: 'row',flexWrap:'wrap'}}>
+                                {msg.message_txt?msg.message_txt.split(' ').map(data=>{
                                 
-                                {msg.message_txt?<Text style={{color:'white'}}>{msg.message_txt}</Text>:null}
+                                if(data[0] == '$'){
+                                   
+                                  return <TouchableOpacity onPress={()=>Alert.alert(data)}>
+                                   <Text style={{color:'blue',textDecoration:'underline'}}> {data} </Text>
+                                   </TouchableOpacity>
 
+                                }else{
+                                    return  <Text style={{color:'white'}}> {data} </Text>
+
+                                }
+                                }):null}
+                               </View>
                                 {msg.image?
                                 
-                              <Image source={{uri:base_url+'static/msg_images/'+msg.image}} style={{borderRadius:10,width:'80%',height:200,top:5,padding:5}}/>
+                              <Image source={{uri:base_url+'static/msg_images/'+msg.image}} style={{borderRadius:10,width:'100%',height:200,top:5,}}/>
                                 
                                 :null}
                               </View>

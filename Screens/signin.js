@@ -5,6 +5,9 @@ import { TextInput } from 'react-native-gesture-handler'
 import AsyncStorage from '@react-native-community/async-storage';
 import base_url from './base_url'
 
+
+
+
 export default class Signin extends React.Component {
 
     
@@ -50,12 +53,16 @@ export default class Signin extends React.Component {
     }
 
 
+    
+    
+
     login = async()=>{
         let isvalidate = this.validate()
         if(isvalidate){
             let formData = new FormData()
             formData.append('user_name',this.state.username)
             formData.append('password',this.state.password)
+            
 
            await Axios.post(base_url+'login_user',formData)
             .then(res=>{

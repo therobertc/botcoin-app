@@ -20,7 +20,7 @@ import {
   Right,
   Title
 } from "native-base";
-
+import PushNotifications from './services/push_notifications'
 import { ScreenNavigator } from "./navigations/ScreenNavigation";
 import { firebaseConfig } from "./config";
 
@@ -63,11 +63,17 @@ export default class App extends React.Component {
     // }
 
     return (
+     
+
+        
       <Root>
         <View style={styles.container}>
+        <PushNotifications />
           <ScreenNavigator />
         </View>
       </Root>
+     
+
     );
   }
 }

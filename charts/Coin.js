@@ -13,6 +13,8 @@ import {
 } from "native-base";
 import { LineChart } from "react-native-svg-charts";
 import { PropTypes } from "prop-types";
+import Axios from 'axios'
+
 
 class Coin extends Component {
   constructor(props) {
@@ -23,12 +25,17 @@ class Coin extends Component {
       loading: true,
       percent: null,
       price: null,
-      error: null
+      error: null,
+      
+      
     };
   }
 
   componentWillMount() {
-    this.fetchKline();
+   
+      this.fetchKline();
+
+    
   }
 
   fetchKline() {
@@ -44,11 +51,11 @@ class Coin extends Component {
       .then(resp => {
         console.log(resp);
         const trades = resp.map(interval => parseFloat(interval[1]));
-        console.log(trades);
+        console.log('This is the Trade '+trades);
         const firstTrade = trades[0];
-        console.log("first trades", firstTrade);
+        // console.log("first trades", firstTrade);
         const lastTrade = trades.slice(-1)[0];
-        console.log("last trades", lastTrade);
+        // console.log("last trades", lastTrade);
         const percent = (((lastTrade - firstTrade) / firstTrade) * 100).toFixed(
           2
         );
@@ -67,7 +74,16 @@ class Coin extends Component {
           error: true
         });
       });
+
+
+
+
+  
   }
+
+
+
+
 
   chooseStyle() {
     const { percent } = this.state;
@@ -80,8 +96,10 @@ class Coin extends Component {
   }
 
   render() {
+   
     const { loading, trades, percent, price, error } = this.state;
     const { baseAsset, quoteAsset, interval, rank } = this.props;
+    
     // console.log('Name',baseAsset)
 
     const style = this.chooseStyle();
@@ -136,6 +154,8 @@ class Coin extends Component {
       );
     }
 
+    
+
     return (
       <Card style={{ backgroundColor: "#282c34" }}>
         {cardHeader}
@@ -143,6 +163,11 @@ class Coin extends Component {
         {cardFooter}
       </Card>
     );
+  
+
+
+  
+
   }
 }
 
