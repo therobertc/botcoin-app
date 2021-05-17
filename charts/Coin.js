@@ -15,126 +15,70 @@ import { LineChart } from "react-native-svg-charts";
 import { PropTypes } from "prop-types";
 import Axios from 'axios'
 
+const data = [23,-23,231,3882,9928,82]
 
 class Coin extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      trades: [],
-      loading: true,
-      percent: null,
-      price: null,
-      error: null,
-      
-      
-    };
-  }
-
-  componentWillMount() {
-   
-      this.fetchKline();
-
-    
-  }
-
-  fetchKline() {
-    const { baseAsset, quoteAsset, interval } = this.props;
-
-    fetch(
-      `https://api.binance.com/api/v1/klines?symbol=${baseAsset.toUpperCase()}${quoteAsset.toUpperCase()}&interval=${interval}&limit=50`,
-      {
-        method: "GET"
-      }
-    )
-      .then(resp => resp.json())
-      .then(resp => {
-        console.log(resp);
-        const trades = resp.map(interval => parseFloat(interval[1]));
-        console.log('This is the Trade '+trades);
-        const firstTrade = trades[0];
-        // console.log("first trades", firstTrade);
-        const lastTrade = trades.slice(-1)[0];
-        // console.log("last trades", lastTrade);
-        const percent = (((lastTrade - firstTrade) / firstTrade) * 100).toFixed(
-          2
-        );
-
-        this.setState({
-          loading: false,
-          trades: trades,
-          percent: percent,
-          price: lastTrade
-        });
-      })
-      .catch(err => {
-        console.log(err);
-
-        this.setState({
-          error: true
-        });
-      });
-
-
-
+  
 
   
-  }
-
 
 
 
 
   chooseStyle() {
-    const { percent } = this.state;
-
-    if (parseFloat(percent) < 0) {
+    
       return styles.priceDown;
-    }
-
-    return styles.priceUp;
+   
   }
 
   render() {
    
-    const { loading, trades, percent, price, error } = this.state;
-    const { baseAsset, quoteAsset, interval, rank } = this.props;
-    
-    // console.log('Name',baseAsset)
 
     const style = this.chooseStyle();
 
     const cardHeader = (
+      <View>
+
+
+
       <CardItem style={{ backgroundColor: "#282c34" }}>
-        {/* <Left>
-          {/* <Text style={{ fontSize: 30, marginRight: 20 }}>{rank}</Text>
-        </Left> */}
-        <Left>
-          <Thumbnail
-            source={{
-              uri: `https://raw.githubusercontent.com/atomiclabs/cryptocurrency-icons/master/128/color/${baseAsset}.png`
-            }}
-          />
-          <Body>
-            <Text style={{ color: "#FFF", fontWeight: "800" }}>
-              {baseAsset.toUpperCase()}/{quoteAsset.toUpperCase()}
-            </Text>
-            <Text note>{interval}</Text>
-          </Body>
+        <Left >
+         <Text style={{ fontSize: 20,}}>rank # {this.props.rank}</Text>
         </Left>
+
+      
+
       </CardItem>
+
+<View style={{flexDirection: 'row',padding:10}}>
+      
+      
+         <View style={{backgroundColor:'gray',borderWidth:.5,borderColor:'gray',width:50,height:50,borderRadius:100,justifyContent:'center',alignItems: 'center',marginLeft:5}}>
+         <Text style={{color:'white',fontSize:16,fontWeight:'bold'}}>{this.props.symbol.substring(0,1)}</Text>
+         </View>       
+        
+        
+        
+         <View style={{left:5,top:10}}>
+         <Text style={{color:'white',fontSize:15,}}>{this.props.symbol}/USD</Text>
+         </View>
+       
+
+        </View>
+
+
+      </View>
+
     );
 
     let cardBody = <Spinner />; // Loading State
     let cardFooter = false;
 
-    if (error) {
-      cardBody = <Text>Error fetching history, please try again.</Text>;
-    } else if (!loading) {
+
       cardBody = (
         <View style={styles.view}>
           <LineChart
-            data={trades}
+            data={[this.props.change_percentage_of_90days,this.props.change_percentage_of_60days,this.props.change_percentage_of_30days,this.props.change_percentage_of_7days,this.props.change_percentage_of_24hr,this.props.change_percentage_of_1hr]}
             style={styles.chart}
             svg={{ stroke: style.color, strokeWidth: 3 }}
           />
@@ -144,15 +88,15 @@ class Coin extends Component {
       cardFooter = (
         <CardItem footer style={{ backgroundColor: "#282c34" }}>
           <Left>
-            <Text style={style}>{percent}%</Text>
+            <Text style={style}>{this.props.changePercent.toFixed(5)}%</Text>
           </Left>
           <Body />
           <Right>
-            <Text style={style}>${price.toLocaleString("en-us")}</Text>
+            <Text style={style}>${this.props.price.toFixed(5)}</Text>
           </Right>
         </CardItem>
       );
-    }
+    
 
     
 

@@ -265,16 +265,7 @@ export default class GroupChatting extends React.Component {
       }
 
 
-      checkingForTag = (tag)=>{
-        coins_list.map(data=>{
-          
-            if(data == tag){
-                
-                return true
-            }
-            return false
-        })
-      }
+    
 
      renderContent = () => (
         <View
@@ -352,7 +343,11 @@ export default class GroupChatting extends React.Component {
                                 
                                 if(data[0] == '$' && data.length>1){
                                    
-                                  return <TouchableOpacity onPress={()=>this.props.navigation.navigate('Coin',{coin_name:data})}>
+                                  return <TouchableOpacity onPress={()=>{
+                                      const symbol = data.toUpperCase();
+                                      this.props.navigation.navigate('Coin',{symbol:symbol.slice(1)})
+                                      
+                                      }}>
                                    <Text style={{color:'blue',textDecoration:'underline'}}> {data} </Text>
                                    </TouchableOpacity>
 

@@ -9,7 +9,8 @@ import {
   Image,
   LogBox,
   Alert,
-  Dimensions
+  Dimensions,
+  FlatList,
 } from "react-native";
 import {
   Container,
@@ -24,7 +25,7 @@ import {
   Right,
   Title
 } from "native-base";
-import { LineChart } from "react-native-svg-charts";
+
 
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-community/async-storage'
@@ -32,21 +33,24 @@ import Axios from 'axios'
 import base_url from './base_url'
 import Coin from "../charts/Coin";
 
-let all_notifications = []
+
 
 export default class HomeCoins extends React.Component {
-  constructor(props) {
-    super(props);
+  
 
-    this.state = {
-      loading: true,
-      search: "",
-      value: "",
-      notifications_count:0,
-      notifications:[],
-      searched_data:{}
-    };
-  }
+  state = {
+    loading: true,
+    
+    search_bar: "",
+    notifications_count:0,
+    notifications:[],
+    all_coins:[],
+    search_coins:[]
+   
+   
+  };
+
+
 
   get_notification_count = async()=>{
   const user = await AsyncStorage.getItem('user')
@@ -70,33 +74,36 @@ export default class HomeCoins extends React.Component {
 
 
   
+get_all_coins = async()=>{
+await Axios.get('https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=60c07164-25a2-4fe5-ac38-685e07d675b7&sort=market_cap&start=1&limit=100&cryptocurrency_type=tokens&convert=USD')
+  .then(res=>{
+    const data= res.data.data
+   this.setState({all_coins:data})
+   this.setState({search_coins:this.state.all_coins})
+    
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+}
 
 
- 
 
-  search_coin = (value)=>{
-    Axios.get(`https://cloud.iexapis.com/stable/stock/${value}/quote?token=pk_0db8d87dbdde49c5b215cd4ec559ed13&format=json`)
-    .then(res=>{
-         if(res.status != 404){
-          this.setState({searched_data:res.data})
-
-         }
-         console.log(res.data)
-      
-    })
-  }
-
-
-  componentDidMount() {
+  async componentDidMount() {
     LogBox.ignoreAllLogs()
     
+    await this.get_all_coins()
 
     
     
     this.get_notification_count()
     this.props.navigation.addListener('focus',()=>{
       this.get_notification_count()
+      
+
     })
+
+    
     Expo.Font.loadAsync({
       Roboto: require("native-base/Fonts/Roboto.ttf"),
       Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf")
@@ -107,60 +114,7 @@ export default class HomeCoins extends React.Component {
     });
   }
 
-  renderElement() {
-    if (
-      this.state.value === "BTC/USDT" ||
-      this.state.value === "BTC" ||
-      this.state.value === "B"
-    )
-      return (
-        <TouchableOpacity>
-          <Coin rank="#1" baseAsset="btc" quoteAsset="usdt" interval="30m" />
-        </TouchableOpacity>
-      );
-    else if (
-      this.state.value === "ETH" ||
-      this.state.value === "ETS/USDT" ||
-      this.state.value === "E"
-    )
-      return (
-        <TouchableOpacity>
-          <Coin rank="#2" baseAsset="eth" quoteAsset="usdt" interval="30m" />
-        </TouchableOpacity>
-      );
-    else if (
-      this.state.value === "DOGE" ||
-      this.state.value === "DOGE/USDT" ||
-      this.state.value === "D"
-    )
-      return (
-        <TouchableOpacity>
-          <Coin rank="#3" baseAsset="doge" quoteAsset="usdt" interval="30m" />
-        </TouchableOpacity>
-      );
-    else if (
-      this.state.value === "LINK" ||
-      this.state.value === "LINK/USDT" ||
-      this.state.value === "LI"
-    )
-      return (
-        <TouchableOpacity>
-          <Coin rank="#4" baseAsset="link" quoteAsset="usdt" interval="30m" />
-        </TouchableOpacity>
-      );
-    else if (
-      this.state.value === "LTC" ||
-      this.state.value === "LTC/USDT" ||
-      this.state.value === "LT"
-    )
-      return (
-        <TouchableOpacity>
-          <Coin rank="#5" baseAsset="ltc" quoteAsset="usdt" interval="30m" />
-        </TouchableOpacity>
-      );
 
-    return null;
-  }
 
   render() {
     const { loading } = this.state;
@@ -168,7 +122,7 @@ export default class HomeCoins extends React.Component {
     if (loading) {
       return <Spinner />;
     }
-    const data = [ 50, 10, 40, 95, -4, -24, 85, 91, 35, 53, -53, 24, 50, -20, -80 ]
+  
     return (
       <Root>
         <View style={styles.container}>
@@ -244,112 +198,60 @@ export default class HomeCoins extends React.Component {
               placeholder="Search crypto"
               // value={email}
               onChangeText={value => {
-                this.setState({ value })
-
-                this.search_coin(value)
               
-              }}
+               
+                  
+                 this.setState({search_coins:
+                this.state.all_coins.filter(i=>i.symbol.toLowerCase().includes(value.toLowerCase()))
+                })
+                
+              
+             
+            
+            }
+            }
             />
           </View>
-          {this.state.value === "" ? (
+          
             <Container style={{ backgroundColor: "#282c34" }}>
               <Content>
-                {/* <View>
-                <Image
-                  source={require("/Users/robjcalderon/react-native-crypto-tracker/assets/botcoin.png")}
-                  style={{ width: 200, height: 40 }}
-                />
-              </View> */}
+              
+                
+                 {this.state.search_coins.map(item=>{
 
-                <TouchableOpacity
-                  onPress={() => this.props.navigation.navigate("Swap")}
+                  return(
+                  <TouchableOpacity
+                  key={item.id}
+                  onPress={() => this.props.navigation.navigate("Coin",{symbol:item.symbol})}
                 >
                   <Coin
-                    rank="#1"
-                    baseAsset="btc"
-                    quoteAsset="usdt"
-                    interval="30m"
-                    want_to_search={false}
+                    rank={item.cmc_rank}
+                   price={item.quote.USD.price}
+                   symbol={item.symbol}
+                   changePercent={item.quote.USD.percent_change_24h}
+                   change_percentage_of_24hr = {item.quote.USD.percent_change_24h}
+                   change_percentage_of_1hr = {item.quote.USD.percent_change_1h}
+                   change_percentage_of_7days = {item.quote.USD.percent_change_7d}
+                   change_percentage_of_30days = {item.quote.USD.percent_change_30d}
+                   change_percentage_of_60days = {item.quote.USD.percent_change_60d}
+                   change_percentage_of_90days = {item.quote.USD.percent_change_90d}
+
+
+                    
 
                   />
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => this.props.navigation.navigate("Swap")}
-                >
-                  <Coin
-                    rank="#2"
-                    baseAsset="eth"
-                    quoteAsset="usdt"
-                    interval="30m"
-                    want_to_search={false}
+                  )
+                })} 
 
-                  />
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => this.props.navigation.navigate("Swap")}
-                >
-                  <Coin
-                    rank="#3"
-                    baseAsset="doge"
-                    quoteAsset="usdt"
-                    interval="30m"
-                    want_to_search={false}
+                
+                
 
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => this.props.navigation.navigate("Swap")}
-                >
-                  <Coin
-                    rank="#4"
-                    baseAsset="link"
-                    quoteAsset="usdt"
-                    interval="30m"
-                    want_to_search={false}
-
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => this.props.navigation.navigate("Swap")}
-                >
-                  <Coin
-                    rank="#5"
-                    baseAsset="ltc"
-                    quoteAsset="usdt"
-                    interval="30m"
-                    want_to_search={false}
-                  />
-                </TouchableOpacity>
+               
               </Content>
             </Container>
-          ) : this.state.searched_data?(
-
-
-           <TouchableOpacity onPress={()=>this.props.navigation.navigate('Coin',{coin_name:'$'+this.state.searched_data.symbol})} style={{borderColor:'gray',width:Dimensions.get('window').width,borderWidth:.5,marginTop:20,padding:30,borderRadius:3,height:'47%'}}>
-             <View style={{flexDirection: 'row'}}>
-             
-             <View style={{borderColor:'gray',borderWidth:1,backgroundColor:'gray',borderRadius:200,justifyContent:'center',alignItems: 'center',padding:8,width:60,height:60}}>
-             <Text style={{color:'white',fontWeight:'bold',fontSize:25}}>{this.state.searched_data.symbol?this.state.searched_data.symbol.substring(0, 1):null}</Text>
-
-             </View>
-             
-             <Text style={{color:'white',fontSize:20,left:10,top:10}}>{this.state.searched_data.symbol?this.state.searched_data.symbol:null}/USDT</Text>
-
-             </View>
-             <LineChart
-            data={data}
-            style={styles.chart}
-            svg={{ stroke: '#FF00FF', strokeWidth: 3 }}
-          />
-             <View style={{flexDirection: 'row',marginTop:16,justifyContent: 'space-between'}}>
-             <Text style={{color:'white',fontSize:16,color:'#FF00FF'}}>{this.state.searched_data.changePercent?this.state.searched_data.changePercent:0}%</Text>
-
-             <Text style={{color:'white',fontSize:16,color:'#FF00FF'}}>${this.state.searched_data.latestPrice}</Text>
-             </View>
-
-             </TouchableOpacity>
-          ):null}
+         
         </View>
       </Root>
 

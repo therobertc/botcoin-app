@@ -10,74 +10,105 @@ import {
     Image,
     LogBox,
     Alert,
-    Dimensions
+    Dimensions,
+  ActivityIndicator
+
   } from "react-native";
 import Axios from 'axios'
 import base_url from './base_url'
 import { LineChart } from "react-native-svg-charts";
 
 
-const data = [ 50, 10, 40, 95, -4, -24, 85, 91, 35, 53, -53, 24, 50, -20, -80 ]
 export default class ViewCoin extends React.Component {
      state = {
-     coin:{},
-     show:false,
+     coin:[],
+     is_loading:true,
+     filtered_coin:null
     }
 
-    componentDidMount(){
-        console.log(this.props.route.params.coin_name.substring(1))
-        Axios.get(`https://cloud.iexapis.com/stable/stock/${this.props.route.params.coin_name.substring(1)}/quote?token=pk_0db8d87dbdde49c5b215cd4ec559ed13&format=json`)
-    .then(res=>{
-         if(res.status != 404){
-            this.setState({coin:res.data,show:true})
-           
 
-         }else{
-             this.setState({coin:null,show:false})
-         }
-         console.log(res.data)
-      
+    get_all_coins = async()=>{
+      await Axios.get('https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=60c07164-25a2-4fe5-ac38-685e07d675b7&sort=market_cap&start=1&limit=100&cryptocurrency_type=tokens&convert=USD')
+        .then(res=>{
+          const data = res.data.data
+         this.setState({coin:data})
+          
+        })
+        .catch(err=>{
+          console.log(err)
+        })
+      }
+   
+
+  async  componentDidMount(){
+    
+    await this.get_all_coins()
+    .then(()=>{
+      this.state.coin.filter(coin=>{
+        if(coin.symbol == this.props.route.params.symbol){
+          console.log(coin)
+
+          const data = coin
+          this.setState({filtered_coin:data})
+        }
+      })
+      this.setState({is_loading:false})
     })
-    .catch(err=>{
-        console.log(err)
-    })
+    
     }
-
     render(){
-        if(this.state.show){
+     
+        if(!this.state.is_loading){
+
+        if(this.state.filtered_coin){
+
+
 
         return (
             <View style={styles.container}>
-            <TouchableOpacity style={{borderColor:'gray',width:Dimensions.get('window').width,borderWidth:.5,marginTop:20,padding:30,borderRadius:3,height:'47%'}}>
+            <View style={{width:Dimensions.get('window').width,marginTop:20,padding:30,height:'47%'}}>
             <View style={{flexDirection: 'row'}}>
             
             <View style={{borderColor:'gray',borderWidth:1,backgroundColor:'gray',borderRadius:200,justifyContent:'center',alignItems: 'center',padding:8,width:60,height:60}}>
-            <Text style={{color:'white',fontWeight:'bold',fontSize:25}}>{this.state.coin.symbol?this.state.coin.symbol.substring(0, 1):null}</Text>
+            <Text style={{color:'white',fontWeight:'bold',fontSize:25}}>{this.state.filtered_coin.symbol?this.state.filtered_coin.symbol.substring(0,1):null}</Text>
 
             </View>
             
-            <Text style={{color:'white',fontSize:20,left:10,top:10}}>{this.state.coin.symbol?this.state.coin.symbol:null}/USDT</Text>
-
+            <Text style={{color:'white',fontSize:20,left:10,top:10}}>{this.state.filtered_coin.symbol}/USD</Text>
+            <Text style={{ fontSize: 23,color:'white',left:'90%',top:5}}>rank # {this.state.filtered_coin.cmc_rank}</Text>
+            
             </View>
             <LineChart
-           data={data}
+           data={[this.state.filtered_coin.quote.USD.percent_change_90d,this.state.filtered_coin.quote.USD.percent_change_60d,this.state.filtered_coin.quote.USD.percent_change_30d,this.state.filtered_coin.quote.USD.percent_change_7d,this.state.filtered_coin.quote.USD.percent_change_24h,this.state.filtered_coin.quote.USD.percent_change_1h]}
            style={styles.chart}
            svg={{ stroke: '#FF00FF', strokeWidth: 3 }}
          />
             <View style={{flexDirection: 'row',marginTop:16,justifyContent: 'space-between'}}>
-            <Text style={{color:'white',fontSize:16,color:'#FF00FF'}}>{this.state.coin.changePercent?this.state.coin.changePercent:0}%</Text>
+            <Text style={{color:'white',fontSize:16,color:'#FF00FF'}}>{this.state.filtered_coin.quote.USD.percent_change_24h}%</Text>
 
-            <Text style={{color:'white',fontSize:16,color:'#FF00FF'}}>${this.state.coin.latestPrice}</Text>
+            <Text style={{color:'white',fontSize:16,color:'#FF00FF'}}>${this.state.filtered_coin.quote.USD.price}</Text>
             </View>
 
-            </TouchableOpacity>
+            </View>
             </View>
         )
-    }else{
-        return <View style={[styles.container,{justifyContent:'center',alignItems: 'center'}]}>
-          <Text style={{color:'red',fontSize:15,fontWeight:'bold'}}>We couldn't Found Any Coin by the name of {this.props.route.params.coin_name}</Text>
+      }else{
+        return <View style={{backgroundColor:'#282c34',flex:1,justifyContent:'center',alignItems: 'center'}}>
+        <Text style={{color:'red',fontSize:20}}>Sorry,Could'nt Found Any Coin</Text>
         </View>
+      }
+      
+
+    }else{
+      return(
+        <View style={{alignItems: 'center',backgroundColor:"#282c34",flex:1}}>
+      <ActivityIndicator color='#FF00FF' size='large' style={{marginTop:50}} />
+        </View>
+      )
     }
+
+    
+
 
     }
 }
